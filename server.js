@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -8,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
+// 代理获取专辑数据的 API 请求
 app.get('/api/albums', async (req, res) => {
     try {
         const response = await axios.get('https://monster-siren.hypergryph.com/api/albums', {
@@ -18,6 +18,20 @@ app.get('/api/albums', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching data' });
+    }
+});
+
+// 代理图片请求
+app.get('/proxy-image', async (req, res) => {
+    const imageUrl = req.query.url;
+
+    try {
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const contentType = response.headers['content-type'];
+        res.set('Content-Type', contentType);
+        res.send(response.data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching image' });
     }
 });
 
