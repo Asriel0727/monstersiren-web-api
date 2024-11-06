@@ -21,6 +21,36 @@ app.get('/api/albums', async (req, res) => {
     }
 });
 
+// 代理获取单个专辑详细信息的 API 请求
+app.get('/api/album/:id/detail', async (req, res) => {
+    const albumId = req.params.id;
+    try {
+        const response = await axios.get(`https://monster-siren.hypergryph.com/api/album/${albumId}/detail`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching album details' });
+    }
+});
+
+// 代理获取单个歌曲详细信息的 API 请求
+app.get('/api/song/:id', async (req, res) => {
+    const songId = req.params.id;
+    try {
+        const response = await axios.get(`https://monster-siren.hypergryph.com/api/song/${songId}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching song details' });
+    }
+});
+
 // 代理图片请求
 app.get('/proxy-image', async (req, res) => {
     const imageUrl = req.query.url;

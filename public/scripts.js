@@ -1,82 +1,117 @@
+// 获取所有专辑列表
 async function fetchAlbums() {
     try {
         const response = await fetch('http://localhost:3000/api/albums');
-        const data = await response.json();
-        const albumsDiv = document.getElementById('albums');
-
-        console.log(data.data); // 检查专辑数据
-
-        data.data.forEach(album => {
-            const albumDiv = document.createElement('div');
-            albumDiv.className = 'album';
-            albumDiv.innerHTML = `
-                <h2>${album.name}</h2>
-                <img src="http://localhost:3000/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}">
-                <p>Artistes: ${album.artistes.join(', ')}</p>
-                <button onclick="playAlbum('${album.cid}')">播放专辑</button> <!-- 使用 album.cid -->
-            `;
-            albumsDiv.appendChild(albumDiv);
-        });
+        const albumsData = await response.json();
+        displayAlbums(albumsData.data);
     } catch (error) {
         console.error('Error fetching albums:', error);
     }
 }
 
-async function playAlbum(albumId) {
-    try {
-        // 获取专辑详细信息
-        const response = await fetch(`http://localhost:3000/api/album/${albumId}/detail`);
-        const albumData = await response.json();
+// 显示专辑列表
+function displayAlbums(albums) {
+    console.log("Albums data:", albums); // 调试输出，查看专辑数据
+    const albumsContainer = document.getElementById('albums');
+    
+    albums.forEach(album => {
+        const albumElement = document.createElement('div');
+        albumElement.classList.add('album');
         
-        const songs = albumData.data.songs; // 获取专辑中的所有歌曲
-        showSongSelection(songs); // 显示歌曲选择列表
+        // 使用本地代理加载图片
+        const proxiedCoverUrl = `http://localhost:3000/proxy-image?url=${encodeURIComponent(album.coverUrl)}`;
 
+        albumElement.innerHTML = `
+            <img src="${proxiedCoverUrl}" alt="${album.name}">
+            <h2>${album.name}</h2>
+            <p>${album.artistes.join(', ')}</p>
+            <button onclick="fetchAlbumDetails('${album.cid}')">查看歌曲</button>
+        `;
+        
+        albumsContainer.appendChild(albumElement);
+    });
+}
+
+// 获取单个专辑的详细信息
+async function fetchAlbumDetails(albumId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/album/${albumId}/detail`);
+        const albumDetailsData = await response.json();
+        displayAlbumDetails(albumDetailsData.data);
     } catch (error) {
         console.error('Error fetching album details:', error);
     }
 }
 
-function showSongSelection(songs) {
-    const songSelectionDiv = document.getElementById('songSelection');
-    songSelectionDiv.innerHTML = ''; // 清空之前的内容
+// 显示专辑详细信息和歌曲列表
+function displayAlbumDetails(album) {
+    console.log("Album details:", album); // 查看专辑的详细信息
 
-    songs.forEach(song => {
-        const songDiv = document.createElement('div');
-        songDiv.innerHTML = `
-            <p>${song.name} - ${song.artistes.join(', ')}</p>
-            <button onclick="playSong('${song.cid}')">播放</button> <!-- 使用 song.cid -->
+    // 确保页面中的元素是有效的
+    const albumContent = document.getElementById('albumContent');
+    const songsList = document.getElementById('songsList');
+
+    if (albumContent && songsList) {
+        // 如果专辑封面图片 URL 存在，就使用代理加载图片
+        const proxiedCoverDeUrl = album.coverDeUrl ? 
+            `http://localhost:3000/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}` : '';
+
+        // 显示专辑封面、名称和介绍
+        albumContent.innerHTML = `
+            <img src="${proxiedCoverDeUrl}" alt="${album.name}" />
+            <h3>${album.name}</h3>
+            <p>${album.intro}</p>
         `;
-        songSelectionDiv.appendChild(songDiv);
-    });
 
-    songSelectionDiv.style.display = 'block'; // 显示歌曲选择窗口
+        // 清空之前的歌曲列表内容
+        songsList.innerHTML = '';
+
+        // 确保歌曲列表存在并且有歌曲数据
+        if (album.songs && album.songs.length > 0) {
+            album.songs.forEach(song => {
+                // 创建每个歌曲的元素
+                const songElement = document.createElement('div');
+                songElement.classList.add('song-item');
+                songElement.innerHTML = `
+                    <p>${song.name} - ${song.artistes.join(', ')}</p>
+                    <button onclick="playSong('${song.cid}')">播放歌曲</button>
+                `;
+                // 将歌曲添加到歌曲列表中
+                songsList.appendChild(songElement);
+            });
+        } else {
+            // 如果没有歌曲，显示提示信息
+            songsList.innerHTML = "<p>No songs available</p>";
+        }
+
+        // 打开侧边栏
+        toggleSidebar();
+    } else {
+        console.error("Error: albumContent or songsList element not found in the DOM.");
+    }
 }
 
+// 显示/隐藏侧边栏
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
+// 获取单个歌曲并播放
 async function playSong(songId) {
     try {
-        // 获取歌曲基本信息
         const response = await fetch(`http://localhost:3000/api/song/${songId}`);
         const songData = await response.json();
-        
+
         const audioPlayer = document.getElementById('audioPlayer');
-        
-        // 播放音频
-        if (songData.data && songData.data.sourceUrl) {
-            audioPlayer.src = songData.data.sourceUrl; // 播放歌曲
-            audioPlayer.play();
-            closeSongSelection(); // 播放后关闭选择窗口
-        } else {
-            alert('该歌曲没有可播放的音频！');
-        }
+        audioPlayer.src = songData.data.sourceUrl;
+        audioPlayer.play();
+
+        console.log('Lyric URL:', songData.data.lyricUrl); // 调试输出歌词链接
     } catch (error) {
         console.error('Error fetching song details:', error);
     }
 }
 
-function closeSongSelection() {
-    const songSelectionDiv = document.getElementById('songSelection');
-    songSelectionDiv.style.display = 'none'; // 隐藏歌曲选择窗口
-}
-
-// 初始化调用
+// 初始化时获取并显示专辑列表
 fetchAlbums();
