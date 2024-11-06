@@ -9,16 +9,14 @@
 <body>
     <h1>Monster Siren Albums</h1>
     <div id="albums"></div> <!-- 显示专辑列表 -->
-    
-    <!-- 侧边栏 -->
-    <div id="sidebar" class="sidebar">
-        <div id="albumContent">
+
+    <div id="albumDetails" class="album-details">
+        <div id="albumContent" class="album-content">
             <!-- 专辑信息显示在这里 -->
         </div>
         <div id="songsList" class="song-list">
             <!-- 歌曲列表显示在这里 -->
         </div>
-        <button id="closeSidebar" class="close-btn" onclick="toggleSidebar()">关闭</button>
     </div>
 
     <audio id="audioPlayer" controls></audio> <!-- 音乐播放器 -->

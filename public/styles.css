@@ -1,157 +1,161 @@
-/* Reset some default styles */
+/* Reset 基本樣式 */
 body, h1, h2, p, div, img {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Basic layout */
+/* 整體佈局 */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background: linear-gradient(to right, #f4f4f4, #eaeaea); /* 漸層背景 */
     padding: 20px;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-h1 {
-    font-size: 2em;
     color: #333;
 }
 
-main {
-    display: flex;
-    justify-content: space-between;
+h1 {
+    font-size: 2.5em;
+    color: #4CAF50; /* 主標題顏色 */
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
 }
 
-/* Albums section */
+/* 專輯區塊 */
 #albums {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: flex-start;
+    justify-content: center; /* 專輯列表居中顯示 */
 }
 
-/* Album card styles */
 .album {
-    margin-bottom: 20px;
-    padding: 10px;
+    width: 240px; /* 增加卡片寬度 */
+    padding: 15px;
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.album:hover {
+    transform: scale(1.05); /* 放大效果 */
 }
 
 .album img {
     width: 100%;
-    height: auto;
-    margin-bottom: 10px;
     border-radius: 8px;
+    margin-bottom: 15px;
 }
 
 .album h2 {
-    font-size: 1.2em;
-    margin-bottom: 5px;
+    font-size: 1.2em; /* 增加專輯名稱字體大小 */
+    color: #333;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .album p {
-    font-size: 0.9em;
+    font-size: 1em; /* 調整作曲人字體大小 */
     color: #666;
+    margin-bottom: 10px; /* 增加作曲人下方間距 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.album button {
-    margin-top: 10px;
-    padding: 8px 12px;
-    font-size: 0.9em;
-    background-color: #4CAF50;
-    color: white;
+/* 按鈕樣式 */
+.album button, .song-item button {
+    padding: 8px 15px;
+    font-size: 0.9em; /* 增加按鈕字體大小 */
+    background-color: #4CAF50; /* 按鈕顏色 */
+    color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 陰影效果 */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* 過渡效果 */
 }
 
-.album button:hover {
+.album button:hover, .song-item button:hover {
     background-color: #45a049;
+    transform: translateY(-2px); /* 輕微上移效果 */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* 更強的陰影 */
 }
 
-/* Sidebar styles */
-.sidebar {
+/* 側邊欄樣式 */
+.album-details {
     position: fixed;
-    top: 0;
-    right: -400px; /* 隐藏在屏幕外 */
-    width: 400px;
-    height: 100%;
-    background-color: #fff;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
-    transition: right 0.3s ease;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-/* 侧边栏显示时 */
-.sidebar.active {
     right: 0;
+    top: 0;
+    width: 350px; /* 側邊欄寬度 */
+    height: 100%; /* 全屏高度 */
+    background-color: #fff;
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.4s ease;
+    z-index: 1000;
 }
 
-/* 关闭按钮样式 */
-.close-btn {
-    margin-top: auto;
-    padding: 10px 15px;
-    background-color: #FF5722;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    align-self: flex-end;
+.album-details.active {
+    transform: translateX(0); /* 顯示時滑入 */
 }
 
-.close-btn:hover {
-    background-color: #E64A19;
+.album-content img {
+    max-width: 100%; /* 限制圖片最大寬度 */
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    object-fit: cover; /* 圖片內容適應框架 */
 }
 
-/* Song list styles */
+.album-content h3 {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #4CAF50; /* 專輯標題顏色 */
+    margin-bottom: 10px;
+}
+
+/* 歌曲列表 */
 .song-list {
     margin-top: 20px;
+    font-size: 1em;
 }
 
 .song-item {
-    margin-bottom: 15px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 10px;
-    background-color: #f9f9f9;
+    align-items: center;
+    padding: 10px 15px; /* 增加內部間距 */
+    background-color: #f8f8f8;
     border-radius: 8px;
+    margin-bottom: 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.song-item:hover {
+    background-color: #e8f5e9;
 }
 
 .song-item p {
-    margin: 0;
-    font-size: 1em;
+    font-size: 1em; /* 統一歌曲名稱字體大小 */
+    margin-right: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     color: #333;
 }
 
-.song-item button {
-    padding: 6px 10px;
-    font-size: 0.9em;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.song-item button:hover {
-    background-color: #0056b3;
-}
-
-/* Audio player */
 audio {
     width: 100%;
     margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
