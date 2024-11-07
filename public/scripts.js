@@ -153,36 +153,74 @@ async function playSong(songId) {
         document.getElementById('currentSongTitle').textContent = songData.data.name;
         document.getElementById('albumCover').src = proxiedCoverUrl;
 
-        // 设置播放器为播放状态
-        isPlaying = true;
-
-        // 检查是否有歌词链接
-        if (songData.data.lyricUrl) {
+        // 处理歌词
+        if (songData.data.lyricUrl) {            
+            console.log('Fetching lyrics from:', songData.data.lyricUrl);
             const proxiedLyricUrl = `http://localhost:3000/proxy-lyrics?url=${encodeURIComponent(songData.data.lyricUrl)}`;
             const lyric_response = await fetch(proxiedLyricUrl);
             const lyrics = await lyric_response.text();
-            console.log('Parsed Lyrics:', parseLyrics(lyrics)); // 调试输出解析后的歌词
+            console.log('Fetched lyrics text:', lyrics);
+            
+            // 解析并显示歌词
+            const parsedLyrics = parseLyrics(lyrics);
+            console.log('Parsed lyrics:', parsedLyrics);
+            displayLyrics(parsedLyrics);
         } else {
-            console.log('No lyrics available.');
+            // 如果没有歌词，隐藏歌词区域
+            document.getElementById('lyricsContainer').innerHTML = "<p>No lyrics available</p>";
         }
+
+        // 设置播放器为播放状态
+        isPlaying = true;
 
     } catch (error) {
         console.error('Error fetching song or album details:', error);
     }
 }
 
-// 解析 LRC 格式的歌词
-function parseLyrics(lyricsText) {
-    const lines = lyricsText.split('\n');
-    const parsedLyrics = lines.map(line => {
-        const timeMatch = line.match(/\[(\d{2}:\d{2}\.\d{2})\]/); // 匹配时间戳
-        const text = line.replace(/\[.*?\]/g, '').trim(); // 移除时间戳部分
-        return {
-            time: timeMatch ? timeMatch[1] : null,
-            text: text
-        };
+// 解析歌词，假设歌词是 LRC 格式
+function parseLyrics(lyrics) {
+    console.log('Parsing lyrics...');
+
+    // 将歌词分行
+    const lines = lyrics.split('\n');
+    const parsedLyrics = [];
+
+    // 正则表达式：匹配 LRC 格式的时间戳和歌词
+    const regex = /\[(\d{2}):(\d{2}\.\d{2,3})\](.*)/;
+
+    // 遍历每行歌词，尝试匹配正则表达式
+    lines.forEach(line => {
+        const match = line.match(regex);
+        if (match) {
+            // 提取时间和歌词，并将其存储在 parsedLyrics 数组中
+            parsedLyrics.push({
+                time: `${match[1]}:${match[2]}`,
+                text: match[3]
+            });
+        }
     });
-    return parsedLyrics.filter(item => item.text); // 返回非空歌词
+
+    // 输出解析后的歌词
+    console.log('Parsed lyrics:', parsedLyrics);
+    return parsedLyrics;
+}
+
+// 显示歌词
+function displayLyrics(parsedLyrics) {
+    const lyricsContainer = document.getElementById('lyricsContainer');
+    
+    // 清空之前的歌词
+    lyricsContainer.innerHTML = '';
+    
+    console.log('Displaying lyrics...');
+
+    parsedLyrics.forEach(lyric => {
+        const lyricElement = document.createElement('p');
+        lyricElement.textContent = `${lyric.time} ${lyric.text}`;
+        lyricsContainer.appendChild(lyricElement);
+        console.log('Displayed lyric:', lyric.time, lyric.text);
+    });
 }
 
 // 停止播放音乐时重置播放器状态
