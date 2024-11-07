@@ -125,25 +125,64 @@ function togglePlayer() {
 // 获取单个歌曲并播放
 async function playSong(songId) {
     try {
-        const response = await fetch(`http://localhost:3000/api/song/${songId}`);
-        const songData = await response.json();
+        // 先获取歌曲详情
+        const song_response = await fetch(`http://localhost:3000/api/song/${songId}`);
+        const songData = await song_response.json();
 
+        // 使用歌曲的 albumCid 来获取专辑详情
+        const albumCid = songData.data.albumCid;
+        const album_response = await fetch(`http://localhost:3000/api/album/${albumCid}/detail`);
+        const albumDetail = await album_response.json();
+
+        // 播放歌曲
         const audioPlayer = document.getElementById('audioPlayer');
         audioPlayer.src = songData.data.sourceUrl;
         audioPlayer.play();
 
-        // 更新播放器中的歌曲名称和封面
+        // 使用本地代理加载专辑封面图片
+        let proxiedCoverUrl = '';
+        if (albumDetail.data.coverUrl) {
+            proxiedCoverUrl = `http://localhost:3000/proxy-image?url=${encodeURIComponent(albumDetail.data.coverUrl)}`;
+        } else {
+            // 如果没有封面 URL，使用默认图片
+            proxiedCoverUrl = '/path/to/default-image.jpg'; // 替换成默认图片路径
+        }
+
+        // 更新播放器中的歌曲名称和专辑封面
         document.getElementById('songTitle').textContent = songData.data.name;
         document.getElementById('currentSongTitle').textContent = songData.data.name;
-        document.getElementById('albumCover').src = songData.data.coverUrl;
+        document.getElementById('albumCover').src = proxiedCoverUrl;
 
         // 设置播放器为播放状态
         isPlaying = true;
 
-        console.log('Lyric URL:', songData.data.lyricUrl); // 调试输出歌词链接
+        // 检查是否有歌词链接
+        if (songData.data.lyricUrl) {
+            const proxiedLyricUrl = `http://localhost:3000/proxy-lyrics?url=${encodeURIComponent(songData.data.lyricUrl)}`;
+            const lyric_response = await fetch(proxiedLyricUrl);
+            const lyrics = await lyric_response.text();
+            console.log('Parsed Lyrics:', parseLyrics(lyrics)); // 调试输出解析后的歌词
+        } else {
+            console.log('No lyrics available.');
+        }
+
     } catch (error) {
-        console.error('Error fetching song details:', error);
+        console.error('Error fetching song or album details:', error);
     }
+}
+
+// 解析 LRC 格式的歌词
+function parseLyrics(lyricsText) {
+    const lines = lyricsText.split('\n');
+    const parsedLyrics = lines.map(line => {
+        const timeMatch = line.match(/\[(\d{2}:\d{2}\.\d{2})\]/); // 匹配时间戳
+        const text = line.replace(/\[.*?\]/g, '').trim(); // 移除时间戳部分
+        return {
+            time: timeMatch ? timeMatch[1] : null,
+            text: text
+        };
+    });
+    return parsedLyrics.filter(item => item.text); // 返回非空歌词
 }
 
 // 停止播放音乐时重置播放器状态

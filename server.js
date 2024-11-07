@@ -65,6 +65,24 @@ app.get('/proxy-image', async (req, res) => {
     }
 });
 
+// 代理歌词请求
+app.get('/proxy-lyrics', async (req, res) => {
+    const lyricsUrl = req.query.url;
+
+    try {
+        // 获取歌词文件，作为文本类型
+        const response = await axios.get(lyricsUrl, { responseType: 'text' });
+        const contentType = response.headers['content-type'];
+        
+        // 设置正确的内容类型，例如 'text/plain' 或 'text/lrc'
+        res.set('Content-Type', contentType);
+        res.send(response.data);
+    } catch (error) {
+        console.error('Error fetching lyrics:', error);
+        res.status(500).json({ message: 'Error fetching lyrics' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
