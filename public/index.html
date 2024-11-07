@@ -19,7 +19,21 @@
         </div>
     </div>
 
-    <audio id="audioPlayer" controls></audio> <!-- 音乐播放器 -->
+    <!-- 播放器容器 -->
+    <div id="playerContainer" class="player-container">
+        <div class="player-header" onclick="togglePlayer()"> <!-- 播放器头部，用于控制展开收缩 -->
+            <audio id="audioPlayer" controls></audio> <!-- 音乐播放器 -->
+                <div class="song-info">
+                    <span id="songTitle">歌曲名稱</span>
+                </div>
+            <button id="expandButton">⬆️</button> <!-- 展开/收缩按钮 -->
+        </div>
+    
+        <div id="playerDetails" class="player-details">
+            <img id="albumCover" src="" alt="專輯封面" />
+            <h4 id="currentSongTitle"></h4>
+        </div>
+    </div>
 
     <script src="scripts.js"></script> <!-- 引入 JavaScript 文件 -->
 </body>

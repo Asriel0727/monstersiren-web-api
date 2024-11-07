@@ -23,13 +23,29 @@ function displayAlbums(albums) {
 
         albumElement.innerHTML = `
             <img src="${proxiedCoverUrl}" alt="${album.name}">
-            <h2>${album.name}</h2>
-            <p>${album.artistes.join(', ')}</p>
+            <h2><div class="marquee-container">
+                <div class="marquee-content">${album.name}</div>
+            </div></h2>
+            <p><div class="marquee-container">
+                <div class="marquee-content">${album.artistes.join(', ')}</div>
+            </div></p>
             <button onclick="fetchAlbumDetails('${album.cid}')">查看專輯</button>
         `;
         
         
         albumsContainer.appendChild(albumElement);
+
+        // 动态检测文本是否超出容器宽度
+        const albumTitle = albumElement.querySelector('.marquee-content');
+        const container = albumElement.querySelector('.marquee-container');
+        
+        if (albumTitle.scrollWidth > container.offsetWidth) {
+            // 如果文本内容超出容器宽度，则启用跑马灯效果
+            albumTitle.style.animationPlayState = 'running';
+        } else {
+            // 如果没有超出，保持居中对齐
+            albumTitle.style.transform = 'translateX(0)';
+        }
     });
 }
 
@@ -80,14 +96,29 @@ function displayAlbumDetails(album) {
     }
 }
 
-// 显示/隐藏侧边栏
+// 显示/隐藏侧边栏，并动态调整专辑列表的右边距
 function toggleSidebar() {
     const albumDetails = document.getElementById('albumDetails');
     albumDetails.classList.toggle('active');
 
-    const mainContent = document.querySelector('main');
-    if (mainContent) {
-        mainContent.classList.toggle('sidebar-collapsed');
+    const albumsContainer = document.getElementById('albums');
+
+    if (albumDetails.classList.contains('active')) {
+        // 侧边栏显示，调整专辑列表的 margin-right
+        albumsContainer.style.marginRight = '350px';
+    } else {
+        // 侧边栏隐藏，恢复专辑列表的原始布局
+        albumsContainer.style.marginRight = '0';
+    }
+}
+
+let isPlaying = false; // 用于跟踪播放器是否正在播放音乐
+
+// 切换播放器的展开/收缩状态
+function togglePlayer() {
+    if (isPlaying) {
+        const playerContainer = document.getElementById('playerContainer');
+        playerContainer.classList.toggle('active');
     }
 }
 
@@ -101,11 +132,26 @@ async function playSong(songId) {
         audioPlayer.src = songData.data.sourceUrl;
         audioPlayer.play();
 
+        // 更新播放器中的歌曲名称和封面
+        document.getElementById('songTitle').textContent = songData.data.name;
+        document.getElementById('currentSongTitle').textContent = songData.data.name;
+        document.getElementById('albumCover').src = songData.data.coverUrl;
+
+        // 设置播放器为播放状态
+        isPlaying = true;
+
         console.log('Lyric URL:', songData.data.lyricUrl); // 调试输出歌词链接
     } catch (error) {
         console.error('Error fetching song details:', error);
     }
 }
+
+// 停止播放音乐时重置播放器状态
+document.getElementById('audioPlayer').addEventListener('pause', () => {
+    isPlaying = false; // 设置为非播放状态
+    const playerContainer = document.getElementById('playerContainer');
+    playerContainer.classList.remove('active'); // 播放器自动收起
+});
 
 // 初始化时获取并显示专辑列表
 fetchAlbums();

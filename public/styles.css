@@ -15,10 +15,9 @@ body {
 
 h1 {
     font-size: 2.5em;
-    color: #4CAF50; /* 主標題顏色 */
+    color: #4CAF50;
     text-align: center;
     margin-bottom: 30px;
-    font-weight: bold;
 }
 
 /* 專輯區塊 */
@@ -26,7 +25,9 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: center; /* 專輯列表居中顯示 */
+    justify-content: center;
+    padding-bottom: 100px; /* 为播放器留出空间 */
+    transition: margin-right 0.3s ease; /* 添加过渡效果 */
 }
 
 .album {
@@ -67,6 +68,28 @@ h1 {
     text-overflow: ellipsis;
 }
 
+/* 跑馬燈效果 */
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+  }
+  
+  .marquee-content {
+    display: inline-block;
+    white-space: nowrap;
+    animation: marquee 10s linear infinite;
+    animation-play-state: paused; /* 默认不动画，只有当需要时才启用 */
+  }
+  
+  @keyframes marquee {
+    100% {
+        transform: translateX(-100%); /* 向左滑动到完全看不见 */
+    }
+  }
+
 /* 按鈕樣式 */
 .album button, .song-item button {
     padding: 8px 15px;
@@ -89,21 +112,23 @@ h1 {
 /* 側邊欄樣式 */
 .album-details {
     position: fixed;
-    right: 0;
+    right: -350px; /* 初始隐藏 */
     top: 0;
-    width: 350px; /* 側邊欄寬度 */
-    height: 100%; /* 全屏高度 */
+    width: 350px;
+    height: 100%;
     background-color: #fff;
     box-shadow: -3px 0 8px rgba(0, 0, 0, 0.2);
-    padding: 20px;
     overflow-y: auto;
-    transform: translateX(100%);
-    transition: transform 0.4s ease;
-    z-index: 1000;
+    transition: right 0.3s ease;
 }
 
 .album-details.active {
-    transform: translateX(0); /* 顯示時滑入 */
+    right: 0; /* 显示时滑入 */
+}
+
+/* 当侧边栏处于激活状态时调整专辑列表的右边距 */
+.album-details.active ~ #albums {
+    margin-right: 350px; /* 确保专辑列表与侧边栏不重叠 */
 }
 
 .album-content img {
@@ -153,9 +178,68 @@ h1 {
     color: #333;
 }
 
-audio {
+/* 播放器容器 */
+.player-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    transition: height 0.4s ease; /* 展开/收缩的过渡效果 */
+    z-index: 1000;
+    overflow: hidden; /* 确保展开时内容溢出不会显示 */
+}
+
+.player-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #4CAF50;
+}
+
+.player-header audio {
+    width: 60%;
+}
+
+.song-info {
+    flex-grow: 1;
+    text-align: center;
+    color: #fff;
+}
+
+#expandButton {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #fff;
+}
+
+.player-details {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    height: 0; /* 初始化为收缩状态 */
+    overflow: hidden;
+    background-color: #f4f4f4;
+    transition: height 0.4s ease;
+}
+
+.player-details img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    margin-right: 20px;
+}
+
+.player-details h4 {
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* 展开状态 */
+.player-container.active .player-details {
+    height: 100px; /* 展开时的高度 */
 }
