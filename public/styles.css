@@ -243,3 +243,25 @@ h1 {
 .player-container.active .player-details {
     height: 100px; /* 展开时的高度 */
 }
+
+/* 歌词容器 */
+#lyricsContainer {
+    height: 150px; /* 調整高度 */
+    overflow-y: auto;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    color: white;
+    margin-top: 10px;
+    background-color: #333; /* 添加背景颜色 */
+    padding: 10px;
+}
+
+#lyricsContainer p {
+    margin: 5px 0;
+}
+
+#lyricsContainer p.highlight {
+    color: yellow; /* 高亮颜色 */
+    font-weight: bold;
+}

@@ -11,7 +11,6 @@ async function fetchAlbums() {
 
 // 显示专辑列表
 function displayAlbums(albums) {
-    console.log("Albums data:", albums); // 调试输出，查看专辑数据
     const albumsContainer = document.getElementById('albums');
     
     albums.forEach(album => {
@@ -32,7 +31,6 @@ function displayAlbums(albums) {
             <button onclick="fetchAlbumDetails('${album.cid}')">查看專輯</button>
         `;
         
-        
         albumsContainer.appendChild(albumElement);
 
         // 动态检测文本是否超出容器宽度
@@ -43,7 +41,6 @@ function displayAlbums(albums) {
             // 如果文本内容超出容器宽度，则启用跑马灯效果
             albumTitle.style.animationPlayState = 'running';
         } else {
-            // 如果没有超出，保持居中对齐
             albumTitle.style.transform = 'translateX(0)';
         }
     });
@@ -62,7 +59,6 @@ async function fetchAlbumDetails(albumId) {
 
 // 显示专辑详细信息和歌曲列表
 function displayAlbumDetails(album) {
-    console.log("Album details:", album);
     toggleSidebar(); // 打开侧边栏
 
     const albumContent = document.getElementById('albumContent');
@@ -161,10 +157,10 @@ async function playSong(songId) {
             const lyrics = await lyric_response.text();
             console.log('Fetched lyrics text:', lyrics);
             
-            // 解析并显示歌词
+            // 解析并显示歌词，传递 audioPlayer 作为参数
             const parsedLyrics = parseLyrics(lyrics);
             console.log('Parsed lyrics:', parsedLyrics);
-            displayLyrics(parsedLyrics);
+            displayLyrics(parsedLyrics, audioPlayer); // 确保将 audioPlayer 传递给 displayLyrics
         } else {
             // 如果没有歌词，隐藏歌词区域
             document.getElementById('lyricsContainer').innerHTML = "<p>No lyrics available</p>";
@@ -180,20 +176,13 @@ async function playSong(songId) {
 
 // 解析歌词，假设歌词是 LRC 格式
 function parseLyrics(lyrics) {
-    console.log('Parsing lyrics...');
-
-    // 将歌词分行
     const lines = lyrics.split('\n');
     const parsedLyrics = [];
-
-    // 正则表达式：匹配 LRC 格式的时间戳和歌词
     const regex = /\[(\d{2}):(\d{2}\.\d{2,3})\](.*)/;
 
-    // 遍历每行歌词，尝试匹配正则表达式
     lines.forEach(line => {
         const match = line.match(regex);
         if (match) {
-            // 提取时间和歌词，并将其存储在 parsedLyrics 数组中
             parsedLyrics.push({
                 time: `${match[1]}:${match[2]}`,
                 text: match[3]
@@ -201,33 +190,61 @@ function parseLyrics(lyrics) {
         }
     });
 
-    // 输出解析后的歌词
-    console.log('Parsed lyrics:', parsedLyrics);
     return parsedLyrics;
 }
 
-// 显示歌词
-function displayLyrics(parsedLyrics) {
+// 显示歌词并同步播放
+function displayLyrics(lyrics, audioElement) {
     const lyricsContainer = document.getElementById('lyricsContainer');
-    
-    // 清空之前的歌词
-    lyricsContainer.innerHTML = '';
-    
-    console.log('Displaying lyrics...');
+    lyricsContainer.innerHTML = ''; // 清空现有歌词
 
-    parsedLyrics.forEach(lyric => {
-        const lyricElement = document.createElement('p');
-        lyricElement.textContent = `${lyric.time} ${lyric.text}`;
-        lyricsContainer.appendChild(lyricElement);
-        console.log('Displayed lyric:', lyric.time, lyric.text);
+    lyrics.forEach((line) => {
+        const p = document.createElement('p');
+        p.textContent = line.text;
+        p.dataset.time = line.time; // 将时间戳保存到 data 属性中
+        lyricsContainer.appendChild(p);
+    });
+
+    // 确保 audioElement 存在，并且已经传递给函数
+    if (!audioElement) {
+        console.error('audioElement is undefined');
+        return;
+    }
+
+    // 每秒检查一次歌词时间和音频的当前播放时间
+    audioElement.addEventListener('timeupdate', () => {
+        const currentTime = audioElement.currentTime;
+        
+        // 查找并高亮对应时间的歌词
+        lyrics.forEach((line, index) => {
+            const timeParts = line.time.split(':');
+            const timeInSeconds = parseInt(timeParts[0]) * 60 + parseFloat(timeParts[1]);
+            const nextLineTime = lyrics[index + 1] 
+                ? parseInt(lyrics[index + 1].time.split(':')[0]) * 60 + parseFloat(lyrics[index + 1].time.split(':')[1])
+                : Infinity;
+
+            // 如果当前时间在这行歌词和下一行歌词之间
+            if (currentTime >= timeInSeconds && currentTime < nextLineTime) {
+                lyricsContainer.childNodes[index].classList.add('highlight');
+                scrollLyrics(index);
+            } else {
+                lyricsContainer.childNodes[index].classList.remove('highlight');
+            }
+        });
     });
 }
 
-// 停止播放音乐时重置播放器状态
+// 歌词自动滚动
+function scrollLyrics(index) {
+    const lyricsContainer = document.getElementById('lyricsContainer');
+    const currentLyric = lyricsContainer.childNodes[index];
+    lyricsContainer.scrollTop = currentLyric.offsetTop - lyricsContainer.offsetTop;
+}
+
 document.getElementById('audioPlayer').addEventListener('pause', () => {
-    isPlaying = false; // 设置为非播放状态
+    isPlaying = false;
     const playerContainer = document.getElementById('playerContainer');
-    playerContainer.classList.remove('active'); // 播放器自动收起
+    playerContainer.classList.remove('active');
 });
 
 // 初始化时获取并显示专辑列表
