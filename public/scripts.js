@@ -112,10 +112,8 @@ let isPlaying = false; // 用于跟踪播放器是否正在播放音乐
 
 // 切换播放器的展开/收缩状态
 function togglePlayer() {
-    if (isPlaying) {
-        const playerContainer = document.getElementById('playerContainer');
-        playerContainer.classList.toggle('active');
-    }
+    const playerContainer = document.getElementById('playerContainer');
+    playerContainer.classList.toggle('active');
 }
 
 // 获取单个歌曲并播放

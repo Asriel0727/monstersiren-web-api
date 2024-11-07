@@ -185,10 +185,9 @@ h1 {
     left: 0;
     width: 100%;
     background-color: #fff;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-    transition: height 0.4s ease; /* 展开/收缩的过渡效果 */
+    transition: height 0.4s ease;
     z-index: 1000;
-    overflow: hidden; /* 确保展开时内容溢出不会显示 */
+    overflow: hidden;
 }
 
 .player-header {
@@ -219,19 +218,30 @@ h1 {
 
 .player-details {
     display: flex;
-    align-items: center;
     padding: 10px;
-    height: 0; /* 初始化为收缩状态 */
-    overflow: hidden;
     background-color: #f4f4f4;
-    transition: height 0.4s ease;
+    height: 100%;
 }
 
 .player-details img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 10px;
     margin-right: 20px;
+}
+
+.player-details .info-section {
+    flex: 1; /* 使专辑封面和歌曲信息区域自适应 */
+}
+
+.player-details .lyrics-section {
+    flex: 1; /* 歌词区域右对齐 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #333;
+    color: white;
+    padding: 10px;
 }
 
 .player-details h4 {
@@ -240,21 +250,17 @@ h1 {
 }
 
 /* 展开状态 */
-.player-container.active .player-details {
-    height: 100px; /* 展开时的高度 */
+.player-container.active {
+    height: 20vh; /* 展开时占据屏幕的一半 */
 }
 
 /* 歌词容器 */
 #lyricsContainer {
-    height: 150px; /* 調整高度 */
     overflow-y: auto;
-    text-align: center;
     font-size: 14px;
     line-height: 1.6;
     color: white;
-    margin-top: 10px;
-    background-color: #333; /* 添加背景颜色 */
-    padding: 10px;
+    height: 100%;
 }
 
 #lyricsContainer p {
@@ -264,4 +270,10 @@ h1 {
 #lyricsContainer p.highlight {
     color: yellow; /* 高亮颜色 */
     font-weight: bold;
+}
+
+.time-bar {
+    margin-top: 10px;
+    height: 5px;
+    background-color: #ccc;
 }
