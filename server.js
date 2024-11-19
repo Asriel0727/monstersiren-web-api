@@ -5,7 +5,14 @@ const axios = require('axios');
 const app = express();
 
 app.use(cors());
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://vercel.live");
+    next();
+});
 
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+});
 // 获取专辑列表
 app.get('/api/albums', async (req, res) => {
   try {
