@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://vercel.live; script-src-elem 'self' https://vercel.live;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' http://monstersiren-demo.vercel.app; img-src 'self' http://monstersiren-demo.vercel.app https://web.hycdn.cn; media-src 'self' https://res01.hycdn.cn;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monster Siren Albums</title>
@@ -22,11 +22,11 @@
 
     <!-- 播放器容器 -->
     <div id="playerContainer" class="player-container">
-        <div class="player-header" onclick="togglePlayer()"> <!-- 播放器头部，用于控制展开收缩 -->
+        <div class="player-header">
             <audio id="audioPlayer" controls></audio> <!-- 音乐播放器 -->
-                <div class="song-info">
-                    <span id="songTitle">歌曲名稱</span>
-                </div>
+            <div class="song-info">
+                <span id="songTitle">歌曲名稱</span>
+            </div>
             <button id="expandButton">⬆️</button> <!-- 展开/收缩按钮 -->
         </div>
     

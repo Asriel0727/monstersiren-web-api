@@ -28,7 +28,7 @@ function displayAlbums(albums) {
             <p><div class="marquee-container">
                 <div class="marquee-content">${album.artistes.join(', ')}</div>
             </div></p>
-            <button onclick="fetchAlbumDetails('${album.cid}')">查看專輯</button>
+            <button class="view-album" data-album-id="${album.cid}">查看專輯</button>
         `;
         
         albumsContainer.appendChild(albumElement);
@@ -43,6 +43,13 @@ function displayAlbums(albums) {
         } else {
             albumTitle.style.transform = 'translateX(0)';
         }
+    });
+
+    // 给每个 "查看專輯" 按钮绑定事件
+    document.querySelectorAll('.view-album').forEach(button => {
+        button.addEventListener('click', function() {
+            fetchAlbumDetails(this.dataset.albumId);
+        });
     });
 }
 
@@ -80,10 +87,28 @@ function displayAlbumDetails(album) {
             album.songs.forEach(song => {
                 const songElement = document.createElement('div');
                 songElement.classList.add('song-item');
-                songElement.innerHTML = `
-                    <p>${song.name} - ${song.artistes.join(', ')}</p>
-                    <button onclick="playSong('${song.cid}')">播放歌曲</button>
-                `;
+                
+                // 创建歌曲名称和艺术家信息
+                const songText = document.createElement('p');
+                songText.textContent = `${song.name} - ${song.artistes.join(', ')}`;
+                
+                // 创建播放按钮
+                const playButton = document.createElement('button');
+                playButton.textContent = '播放歌曲';
+                
+                // 使用 data- 属性来存储 song.cid
+                playButton.dataset.songId = song.cid;
+        
+                // 使用 addEventListener 绑定点击事件
+                playButton.addEventListener('click', function() {
+                    playSong(this.dataset.songId);
+                });
+        
+                // 将歌曲名称和按钮添加到 songElement
+                songElement.appendChild(songText);
+                songElement.appendChild(playButton);
+        
+                // 将 songElement 添加到 songsList
                 songsList.appendChild(songElement);
             });
         } else {
@@ -100,15 +125,13 @@ function toggleSidebar() {
     const albumsContainer = document.getElementById('albums');
 
     if (albumDetails.classList.contains('active')) {
-        // 侧边栏显示，调整专辑列表的 margin-right
         albumsContainer.style.marginRight = '350px';
     } else {
-        // 侧边栏隐藏，恢复专辑列表的原始布局
         albumsContainer.style.marginRight = '0';
     }
 }
 
-let isPlaying = false; // 用于跟踪播放器是否正在播放音乐
+let isPlaying = false;
 
 // 切换播放器的展开/收缩状态
 function togglePlayer() {
@@ -119,60 +142,45 @@ function togglePlayer() {
 // 获取单个歌曲并播放
 async function playSong(songId) {
     try {
-        // 先获取歌曲详情
         const song_response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
         const songData = await song_response.json();
 
-        // 使用歌曲的 albumCid 来获取专辑详情
         const albumCid = songData.data.albumCid;
         const album_response = await fetch(`http://monstersiren-demo.vercel.app/api/album/${albumCid}/detail`);
         const albumDetail = await album_response.json();
 
-        // 播放歌曲
         const audioPlayer = document.getElementById('audioPlayer');
         audioPlayer.src = songData.data.sourceUrl;
         audioPlayer.play();
 
-        // 使用本地代理加载专辑封面图片
         let proxiedCoverUrl = '';
         if (albumDetail.data.coverUrl) {
             proxiedCoverUrl = `http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(albumDetail.data.coverUrl)}`;
         } else {
-            // 如果没有封面 URL，使用默认图片
             proxiedCoverUrl = '/path/to/default-image.jpg'; // 替换成默认图片路径
         }
 
-        // 更新播放器中的歌曲名称和专辑封面
         document.getElementById('songTitle').textContent = songData.data.name;
         document.getElementById('currentSongTitle').textContent = songData.data.name;
         document.getElementById('albumCover').src = proxiedCoverUrl;
 
-        // 处理歌词
         if (songData.data.lyricUrl) {            
-            console.log('Fetching lyrics from:', songData.data.lyricUrl);
             const proxiedLyricUrl = `http://monstersiren-demo.vercel.app/proxy-lyrics?url=${encodeURIComponent(songData.data.lyricUrl)}`;
             const lyric_response = await fetch(proxiedLyricUrl);
             const lyrics = await lyric_response.text();
-            console.log('Fetched lyrics text:', lyrics);
-            
-            // 解析并显示歌词，传递 audioPlayer 作为参数
             const parsedLyrics = parseLyrics(lyrics);
-            console.log('Parsed lyrics:', parsedLyrics);
-            displayLyrics(parsedLyrics, audioPlayer); // 确保将 audioPlayer 传递给 displayLyrics
+            displayLyrics(parsedLyrics, audioPlayer);
         } else {
-            // 如果没有歌词，隐藏歌词区域
             document.getElementById('lyricsContainer').innerHTML = "<p>No lyrics available</p>";
         }
 
-        // 设置播放器为播放状态
         isPlaying = true;
-
     } catch (error) {
         console.error('Error fetching song or album details:', error);
     }
 }
 
-// 解析歌词，假设歌词是 LRC 格式
+// 解析歌词
 function parseLyrics(lyrics) {
     const lines = lyrics.split('\n');
     const parsedLyrics = [];
@@ -181,69 +189,63 @@ function parseLyrics(lyrics) {
     lines.forEach(line => {
         const match = line.match(regex);
         if (match) {
-            parsedLyrics.push({
-                time: `${match[1]}:${match[2]}`,
-                text: match[3]
-            });
+            const minutes = parseInt(match[1], 10);
+            const seconds = parseFloat(match[2]);
+            const time = minutes * 60 + seconds;
+            const text = match[3];
+            parsedLyrics.push({ time, text });
         }
     });
 
     return parsedLyrics;
 }
 
-// 显示歌词并同步播放
-function displayLyrics(lyrics, audioElement) {
+// 显示歌词
+function displayLyrics(parsedLyrics, audioPlayer) {
     const lyricsContainer = document.getElementById('lyricsContainer');
-    lyricsContainer.innerHTML = ''; // 清空现有歌词
-
-    lyrics.forEach((line) => {
-        const p = document.createElement('p');
-        p.textContent = line.text;
-        p.dataset.time = line.time; // 将时间戳保存到 data 属性中
-        lyricsContainer.appendChild(p);
+    const timeBar = document.getElementById('timeBar');
+    const lyricsText = document.createElement('div');
+    
+    lyricsText.classList.add('lyrics');
+    parsedLyrics.forEach((line, index) => {
+        const lyricElement = document.createElement('p');
+        lyricElement.textContent = line.text;
+        lyricElement.setAttribute('data-time', line.time);
+        lyricsText.appendChild(lyricElement);
     });
 
-    // 确保 audioElement 存在，并且已经传递给函数
-    if (!audioElement) {
-        console.error('audioElement is undefined');
-        return;
-    }
+    lyricsContainer.innerHTML = '';
+    lyricsContainer.appendChild(lyricsText);
 
-    // 每秒检查一次歌词时间和音频的当前播放时间
-    audioElement.addEventListener('timeupdate', () => {
-        const currentTime = audioElement.currentTime;
-        
-        // 查找并高亮对应时间的歌词
-        lyrics.forEach((line, index) => {
-            const timeParts = line.time.split(':');
-            const timeInSeconds = parseInt(timeParts[0]) * 60 + parseFloat(timeParts[1]);
-            const nextLineTime = lyrics[index + 1] 
-                ? parseInt(lyrics[index + 1].time.split(':')[0]) * 60 + parseFloat(lyrics[index + 1].time.split(':')[1])
-                : Infinity;
+    audioPlayer.ontimeupdate = () => {
+        const currentTime = audioPlayer.currentTime;
 
-            // 如果当前时间在这行歌词和下一行歌词之间
-            if (currentTime >= timeInSeconds && currentTime < nextLineTime) {
-                lyricsContainer.childNodes[index].classList.add('highlight');
-                scrollLyrics(index);
+        parsedLyrics.forEach((line, index) => {
+            const lyricElement = lyricsText.children[index];
+            if (currentTime >= line.time) {
+                lyricElement.classList.add('highlight');
             } else {
-                lyricsContainer.childNodes[index].classList.remove('highlight');
+                lyricElement.classList.remove('highlight');
             }
         });
-    });
+
+        updateTimeBar(currentTime, audioPlayer.duration);
+    };
 }
 
-// 歌词自动滚动
-function scrollLyrics(index) {
-    const lyricsContainer = document.getElementById('lyricsContainer');
-    const currentLyric = lyricsContainer.childNodes[index];
-    lyricsContainer.scrollTop = currentLyric.offsetTop - lyricsContainer.offsetTop;
+// 更新播放时间条
+function updateTimeBar(currentTime, duration) {
+    const timeBar = document.getElementById('timeBar');
+    const percentage = (currentTime / duration) * 100;
+    timeBar.style.width = `${percentage}%`;
 }
 
-document.getElementById('audioPlayer').addEventListener('pause', () => {
-    isPlaying = false;
-    const playerContainer = document.getElementById('playerContainer');
-    playerContainer.classList.remove('active');
-});
+// 初始化应用
+function init() {
+    fetchAlbums();
 
-// 初始化时获取并显示专辑列表
-fetchAlbums();
+    // 绑定播放器切换事件
+    document.getElementById('expandButton').addEventListener('click', togglePlayer);
+}
+
+init();

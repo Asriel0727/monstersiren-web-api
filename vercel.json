@@ -1,4 +1,15 @@
 {
+    "headers": [
+        {
+          "source": "/(.*)",
+          "headers": [
+            {
+                "key": "Content-Security-Policy",
+                "value": "default-src 'self'; script-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline';"
+            }
+          ]
+        }
+    ],
     "version": 2,
     "builds": [
       {
@@ -11,17 +22,6 @@
         "src": "/(.*)",
         "dest": "/server.js"
       }
-    ],
-    "headers": [
-        {
-          "source": "/(.*)",
-          "headers": [
-            {
-                "key": "Content-Security-Policy",
-                "value": "default-src 'self'; script-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline';"
-            }
-          ]
-        }
-      ]
+    ]
   }
   
