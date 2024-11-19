@@ -1,7 +1,7 @@
 // 获取所有专辑列表
 async function fetchAlbums() {
     try {
-        const response = await fetch('http://localhost:3000/api/albums');
+        const response = await fetch('http://monstersiren-demo.vercel.app/api/albums');
         const albumsData = await response.json();
         displayAlbums(albumsData.data);
     } catch (error) {
@@ -18,7 +18,7 @@ function displayAlbums(albums) {
         albumElement.classList.add('album');
         
         // 使用本地代理加载图片
-        const proxiedCoverUrl = `http://localhost:3000/proxy-image?url=${encodeURIComponent(album.coverUrl)}`;
+        const proxiedCoverUrl = `http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}`;
 
         albumElement.innerHTML = `
             <img src="${proxiedCoverUrl}" alt="${album.name}">
@@ -49,7 +49,7 @@ function displayAlbums(albums) {
 // 获取单个专辑的详细信息
 async function fetchAlbumDetails(albumId) {
     try {
-        const response = await fetch(`http://localhost:3000/api/album/${albumId}/detail`);
+        const response = await fetch(`http://monstersiren-demo.vercel.app/api/album/${albumId}/detail`);
         const albumDetailsData = await response.json();
         displayAlbumDetails(albumDetailsData.data);
     } catch (error) {
@@ -66,7 +66,7 @@ function displayAlbumDetails(album) {
 
     if (albumContent && songsList) {
         const proxiedCoverDeUrl = album.coverDeUrl ? 
-            `http://localhost:3000/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}` : '';
+            `http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}` : '';
 
         albumContent.innerHTML = `
             <img src="${proxiedCoverDeUrl}" alt="${album.name}" />
@@ -120,12 +120,12 @@ function togglePlayer() {
 async function playSong(songId) {
     try {
         // 先获取歌曲详情
-        const song_response = await fetch(`http://localhost:3000/api/song/${songId}`);
+        const song_response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
         const songData = await song_response.json();
 
         // 使用歌曲的 albumCid 来获取专辑详情
         const albumCid = songData.data.albumCid;
-        const album_response = await fetch(`http://localhost:3000/api/album/${albumCid}/detail`);
+        const album_response = await fetch(`http://monstersiren-demo.vercel.app/api/album/${albumCid}/detail`);
         const albumDetail = await album_response.json();
 
         // 播放歌曲
@@ -136,7 +136,7 @@ async function playSong(songId) {
         // 使用本地代理加载专辑封面图片
         let proxiedCoverUrl = '';
         if (albumDetail.data.coverUrl) {
-            proxiedCoverUrl = `http://localhost:3000/proxy-image?url=${encodeURIComponent(albumDetail.data.coverUrl)}`;
+            proxiedCoverUrl = `http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(albumDetail.data.coverUrl)}`;
         } else {
             // 如果没有封面 URL，使用默认图片
             proxiedCoverUrl = '/path/to/default-image.jpg'; // 替换成默认图片路径
@@ -150,7 +150,7 @@ async function playSong(songId) {
         // 处理歌词
         if (songData.data.lyricUrl) {            
             console.log('Fetching lyrics from:', songData.data.lyricUrl);
-            const proxiedLyricUrl = `http://localhost:3000/proxy-lyrics?url=${encodeURIComponent(songData.data.lyricUrl)}`;
+            const proxiedLyricUrl = `http://monstersiren-demo.vercel.app/proxy-lyrics?url=${encodeURIComponent(songData.data.lyricUrl)}`;
             const lyric_response = await fetch(proxiedLyricUrl);
             const lyrics = await lyric_response.text();
             console.log('Fetched lyrics text:', lyrics);
