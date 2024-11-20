@@ -1,5 +1,5 @@
 /* Reset 基本樣式 */
-body, h1, h2, p, div, img {
+body, h1, div, img {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -8,272 +8,111 @@ body, h1, h2, p, div, img {
 /* 整體佈局 */
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #f4f4f4, #eaeaea); /* 漸層背景 */
+    background: linear-gradient(to right, #f4f4f4, #eaeaea);
     padding: 20px;
     color: #333;
 }
 
 h1 {
     font-size: 2.5em;
-    color: #4CAF50;
     text-align: center;
     margin-bottom: 30px;
 }
 
-/* 專輯區塊 */
+/* 響應式專輯卡片 */
 #albums {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    justify-content: center;
-    padding-bottom: 100px; /* 为播放器留出空间 */
-    transition: margin-right 0.3s ease; /* 添加过渡效果 */
+    justify-items: center;
+    padding-bottom: 100px;
 }
 
 .album {
-    width: 240px; /* 增加卡片寬度 */
-    padding: 15px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    overflow: hidden;
     text-align: center;
-}
-
-.album:hover {
-    transform: scale(1.05); /* 放大效果 */
+    transition: transform 0.3s ease;
+    width: 100%;
+    max-width: 240px;
 }
 
 .album img {
     width: 100%;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    display: block;
+    object-fit: cover;
 }
 
-.album h2 {
-    font-size: 1.2em; /* 增加專輯名稱字體大小 */
-    color: #333;
-    margin-bottom: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.album:hover {
+    transform: scale(1.05);
 }
 
-.album p {
-    font-size: 1em; /* 調整作曲人字體大小 */
-    color: #666;
-    margin-bottom: 10px; /* 增加作曲人下方間距 */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* 跑馬燈效果 */
-
-.marquee-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    text-align: center;
-  }
-  
-  .marquee-content {
-    display: inline-block;
-    white-space: nowrap;
-    animation: marquee 10s linear infinite;
-    animation-play-state: paused; /* 默认不动画，只有当需要时才启用 */
-  }
-  
-  @keyframes marquee {
-    100% {
-        transform: translateX(-100%); /* 向左滑动到完全看不见 */
-    }
-  }
-
-/* 按鈕樣式 */
-.album button, .song-item button {
-    padding: 8px 15px;
-    font-size: 0.9em; /* 增加按鈕字體大小 */
-    background-color: #4CAF50; /* 按鈕顏色 */
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 陰影效果 */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* 過渡效果 */
-}
-
-.album button:hover, .song-item button:hover {
-    background-color: #45a049;
-    transform: translateY(-2px); /* 輕微上移效果 */
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* 更強的陰影 */
-}
-
-/* 側邊欄樣式 */
-.album-details {
+/* 全屏覆蓋樣式 */
+.overlay {
     position: fixed;
-    right: -350px; /* 初始隐藏 */
     top: 0;
-    width: 350px;
+    left: 0;
+    width: 100%;
     height: 100%;
-    background-color: #fff;
-    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    transition: right 0.3s ease;
-}
-
-.album-details.active {
-    right: 0; /* 显示时滑入 */
-}
-
-/* 当侧边栏处于激活状态时调整专辑列表的右边距 */
-.album-details.active ~ #albums {
-    margin-right: 350px; /* 确保专辑列表与侧边栏不重叠 */
-}
-
-.album-content img {
-    max-width: 100%; /* 限制圖片最大寬度 */
-    height: auto;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    object-fit: cover; /* 圖片內容適應框架 */
-}
-
-.album-content h3 {
-    font-size: 1.4em;
-    font-weight: bold;
-    color: #4CAF50; /* 專輯標題顏色 */
-    margin-bottom: 10px;
-}
-
-/* 歌曲列表 */
-.song-list {
-    margin-top: 20px;
-    font-size: 1em;
-}
-
-.song-item {
-    display: flex;
-    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
     align-items: center;
-    padding: 10px 15px; /* 增加內部間距 */
-    background-color: #f8f8f8;
+    z-index: 9999;
+}
+
+.overlay-content {
+    background: #fff;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
     border-radius: 8px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    max-height: 80%;
 }
 
-.song-item:hover {
-    background-color: #e8f5e9;
+.overlay.active {
+    display: flex;
 }
 
-.song-item p {
-    font-size: 1em; /* 統一歌曲名稱字體大小 */
-    margin-right: 10px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #333;
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
-/* 播放器容器 */
+/* 音樂播放器容器 */
 .player-container {
     position: fixed;
     bottom: 0;
-    left: 0;
     width: 100%;
-    background-color: #fff;
-    transition: height 0.4s ease;
-    z-index: 1000;
-    overflow: hidden;
+    background: #4CAF50;
+    transition: height 0.3s ease;
 }
 
 .player-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     padding: 10px;
-    background-color: #4CAF50;
-}
-
-.player-header audio {
-    width: 60%;
-}
-
-.song-info {
-    flex-grow: 1;
-    text-align: center;
-    color: #fff;
-}
-
-#expandButton {
-    background: none;
-    border: none;
-    font-size: 1.2em;
-    cursor: pointer;
     color: #fff;
 }
 
 .player-details {
-    display: flex;
+    display: none;
     padding: 10px;
-    background-color: #f4f4f4;
-    height: 100%;
+    background: #f4f4f4;
 }
 
-.player-details img {
-    width: 100px;
-    height: 100px;
-    border-radius: 10px;
-    margin-right: 20px;
-}
-
-.player-details .info-section {
-    flex: 1; /* 使专辑封面和歌曲信息区域自适应 */
-}
-
-.player-details .lyrics-section {
-    flex: 1; /* 歌词区域右对齐 */
+.player-container.active .player-details {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    background-color: #333;
-    color: white;
-    padding: 10px;
-}
-
-.player-details h4 {
-    font-size: 1.2em;
-    color: #333;
-}
-
-/* 展开状态 */
-.player-container.active {
-    height: 20vh; /* 展开时占据屏幕的一半 */
-}
-
-/* 歌词容器 */
-#lyricsContainer {
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.6;
-    color: white;
-    height: 100%;
-}
-
-#lyricsContainer p {
-    margin: 5px 0;
-}
-
-#lyricsContainer p.highlight {
-    color: yellow; /* 高亮颜色 */
-    font-weight: bold;
-}
-
-.time-bar {
-    margin-top: 10px;
-    height: 5px;
-    background-color: #ccc;
+    gap: 10px;
 }

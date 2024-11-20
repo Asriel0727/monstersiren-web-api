@@ -1,47 +1,45 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' http://monstersiren-demo.vercel.app; img-src 'self' http://monstersiren-demo.vercel.app https://web.hycdn.cn; media-src 'self' https://res01.hycdn.cn;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monster Siren Albums</title>
-    <link rel="stylesheet" href="styles.css"> <!-- 引入 CSS 文件 -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Monster Siren Albums</h1>
-    <div id="albums"></div> <!-- 显示专辑列表 -->
+    <div id="albums"></div> <!-- 專輯列表容器 -->
 
-    <div id="albumDetails" class="album-details">
-        <div id="albumContent" class="album-content">
-            <!-- 专辑信息显示在这里 -->
-        </div>
-        <div id="songsList" class="song-list">
-            <!-- 歌曲列表显示在这里 -->
+    <!-- 全屏覆蓋模式的專輯詳情 -->
+    <div id="albumDetails" class="overlay">
+        <div class="overlay-content">
+            <button id="closeOverlay" class="close-btn">返回</button>
+            <div id="albumContent"></div>
+            <div id="songsList"></div>
         </div>
     </div>
 
-    <!-- 播放器容器 -->
+    <!-- 音樂播放器 -->
     <div id="playerContainer" class="player-container">
         <div class="player-header">
-            <audio id="audioPlayer" controls></audio> <!-- 音乐播放器 -->
+            <audio id="audioPlayer" controls></audio>
             <div class="song-info">
                 <span id="songTitle">歌曲名稱</span>
             </div>
-            <button id="expandButton">⬆️</button> <!-- 展开/收缩按钮 -->
+            <button id="expandButton">⬆️</button>
         </div>
-    
         <div id="playerDetails" class="player-details">
             <div class="info-section">
                 <img id="albumCover" src="" alt="專輯封面" />
                 <h4 id="currentSongTitle"></h4>
             </div>
             <div class="lyrics-section">
-                <div id="lyricsContainer"></div> 
+                <div id="lyricsContainer"></div>
                 <div class="time-bar" id="timeBar"></div>
             </div>
         </div>
     </div>
 
-    <script src="./scripts/main.js"></script> <!-- 引入 JavaScript 文件 -->
+    <script src="scripts/main.js"></script>
 </body>
 </html>

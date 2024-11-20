@@ -240,12 +240,22 @@ function updateTimeBar(currentTime, duration) {
     timeBar.style.width = `${percentage}%`;
 }
 
-// 初始化应用
-function init() {
+// 初始化應用
+document.addEventListener('DOMContentLoaded', () => {
     fetchAlbums();
 
-    // 绑定播放器切换事件
     document.getElementById('expandButton').addEventListener('click', togglePlayer);
+    document.getElementById('closeOverlay').addEventListener('click', () => {
+        document.getElementById('albumDetails').classList.remove('active');
+    });
+});
+
+// 全屏覆蓋開關
+function toggleOverlay() {
+    document.getElementById('albumDetails').classList.toggle('active');
 }
 
-init();
+// 音樂播放器展開/收起
+function togglePlayer() {
+    document.getElementById('playerContainer').classList.toggle('active');
+}
