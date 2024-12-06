@@ -177,8 +177,9 @@
         }
 
         .album-song-item {
+            border: 2px solid white;
+            border-radius: 5px;
             padding: 10px;
-            border-bottom: 1px solid #ccc; /* Optional: Add a border between items */
         }
 
         /* 動態歌詞區 */
@@ -292,12 +293,13 @@
                 modalBody.innerHTML = `
                     <div class="album-details-modal-content">
                         <div class="album-details-modal-left">
-                            <img src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}" alt="${album.name}">
+                            <img src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}">
                             <h2>${album.name}</h2>
                             <h5>${album.belong}</h5>
                             <p>${album.intro}</p>
                             </div>
-                        <div class="album-details-modal-right">                        
+                        <div class="album-details-modal-right">
+                            <img src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}" alt="${album.name}">                        
                             <h3>曲目</h3>
                             <div class="album-songs-list">
                                 ${album.songs.map(song => `
@@ -377,23 +379,6 @@
             const modal = document.getElementById('modal');
             modal.classList.remove('show');
             if (audioPlayer) audioPlayer.pause();
-        }
-
-        // 将页面内容转换为繁体字
-        function convertToTraditional() {
-            const converter = OpenCC.Converter({ from: 'simplified', to: 'traditional' });
-            const elements = document.body.getElementsByTagName('*');
-            for (let i = 0; i < elements.length; i++) {
-                const element = elements[i];
-                if (element.childNodes.length > 0) {
-                    for (let j = 0; j < element.childNodes.length; j++) {
-                        const childNode = element.childNodes[j];
-                        if (childNode.nodeType === 3) {  // 只处理文本节点
-                            childNode.nodeValue = converter(childNode.nodeValue);
-                        }
-                    }
-                }
-            }
         }
 
         // 初始加載
