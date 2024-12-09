@@ -381,13 +381,40 @@
         function syncLyrics() {
             const currentTime = audioPlayer.currentTime;
             const lyrics = document.querySelectorAll('#lyrics p');
+            let activeLine = null;
+
             lyrics.forEach(line => {
                 const time = parseFloat(line.dataset.time);
                 if (time <= currentTime) {
                     lyrics.forEach(p => p.classList.remove('active'));
                     line.classList.add('active');
+                    activeLine = line;
                 }
             });
+
+            // 自動滾動到當前歌詞
+            if (activeLine) {
+                const lyricsContainer = document.getElementById('lyrics');
+                const containerHeight = lyricsContainer.clientHeight;
+                console.log(containerHeight);
+                const lineTop = activeLine.offsetTop;
+                console.log (lineTop);
+                const lineHeight = activeLine.clientHeight;
+
+                // 計算高亮行要滾動的位置，並避免超出邊界
+                const targetScrollTop = Math.max(
+                    0,
+                    lineTop  - containerHeight - lineHeight * 3.5
+                );
+
+                console.log(targetScrollTop);
+
+                // 平滑滾動到目標位置
+                lyricsContainer.scrollTo({
+                    top: targetScrollTop,
+                    behavior: 'smooth',
+                });
+            }
         }
 
         // 彈窗操作
