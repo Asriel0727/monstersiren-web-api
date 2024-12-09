@@ -319,32 +319,53 @@
 
         // 顯示歌曲信息
         async function fetchSong(songId) {
-            try {
-                const response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
-                const { data: song } = await response.json();
+        try {
+            const response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
+            const { data: song } = await response.json();
+
+            let lyricsContent = '';
+            if (song.lyricUrl) {
                 const lyrics = await fetchLyrics(song.lyricUrl);
-                const modalBody = document.getElementById('modal-body');
-                modalBody.innerHTML = `
-                    <h2>${song.name}</h2>
-                    <audio id="audio-player" controls>
-                        <source src="${song.sourceUrl}" type="audio/mpeg">
-                        您的瀏覽器不支援音頻播放。
-                    </audio>
-                    <div id="lyrics">${lyrics.map(line => `<p data-time="${line.time}">${line.text}</p>`).join('')}</div>
-                `;
-                audioPlayer = document.getElementById('audio-player');
-                audioPlayer.addEventListener('timeupdate', syncLyrics);
-            } catch (error) {
-                console.error('Error fetching song details:', error);
+                if (lyrics.length > 0) {
+                    lyricsContent = `
+                        <div id="lyrics">${lyrics.map(line => `<p data-time="${line.time}">${line.text}</p>`).join('')}</div>`;
+                } else {
+                    lyricsContent = `<p id="no-lyrics">暫無歌詞</p>`;
+                }
+            } else {
+                lyricsContent = `<p id="no-lyrics">暫無歌詞</p>`;
             }
+
+            const modalBody = document.getElementById('modal-body');
+            modalBody.innerHTML = `
+                <h2>${song.name}</h2>
+                <audio id="audio-player" controls>
+                    <source src="${song.sourceUrl}" type="audio/mpeg">
+                    您的瀏覽器不支援音頻播放
+                </audio>
+                ${lyricsContent}
+            `;
+            
+            audioPlayer = document.getElementById('audio-player');
+            if (song.lyricUrl) {
+                audioPlayer.addEventListener('timeupdate', syncLyrics);
+            }
+        } catch (error) {
+            console.error('Error fetching song details:', error);
         }
+    }
 
         // 解析歌詞
         async function fetchLyrics(lyricUrl) {
+        try {
             const response = await fetch(lyricUrl);
             const lrc = await response.text();
             return parseLRC(lrc);
+        } catch (error) {
+            console.error('Error fetching lyrics:', error);
+            return []; // 若無法獲取歌詞，返回空數組
         }
+    }
 
         function parseLRC(lrc) {
             const lines = lrc.split('\n');
