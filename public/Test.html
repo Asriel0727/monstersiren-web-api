@@ -23,6 +23,33 @@
             text-shadow: 0px 3px 10px rgba(0, 128, 255, 0.5);
         }
 
+        #track-bar {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #content-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #lyrics-section {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #58a6ff;
+        }
+
+        #lyrics-section p.active {
+            font-weight: bold;
+            color: #c9d1d9;
+            text-shadow: 0px 2px 5px rgba(255, 255, 255, 0.6);
+        }
+
         .marquee-item {
             white-space: nowrap;
             display: inline-block;
@@ -34,9 +61,9 @@
         }
 
         .marquee-item-wrapper {
-            width: 100%; /* 確保容器大小受限制 */
-            overflow: hidden;    /* 隱藏滾出部分 */
-            position: relative;  /* 為內層滾動提供參考 */
+            width: 100%;            /* 確保容器大小受限制 */
+            overflow: hidden;       /* 隱藏滾出部分 */
+            position: relative;     /* 為內層滾動提供參考 */
             display: block;
         }
 
@@ -260,7 +287,7 @@
                     const albumDiv = document.createElement('div');
                     albumDiv.classList.add('album');
                     albumDiv.innerHTML = `
-                        <img src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}">
+                        <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}" onload="this.classList.add('loaded')">
                         <div class="marquee-item-wrapper">
                             <h2 class = "marquee-item">${album.name}</h2>
                         </div>
@@ -293,13 +320,13 @@
                 modalBody.innerHTML = `
                     <div class="album-details-modal-content">
                         <div class="album-details-modal-left">
-                            <img src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}">
+                            <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}" onload="this.classList.add('loaded')">
                             <h2>${album.name}</h2>
                             <h5>${album.belong}</h5>
                             <p>${album.intro}</p>
                             </div>
                         <div class="album-details-modal-right">
-                            <img src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}" alt="${album.name}">                        
+                            <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}" alt="${album.name}" onload="this.classList.add('loaded')">                        
                             <h3>曲目</h3>
                             <div class="album-songs-list">
                                 ${album.songs.map(song => `
