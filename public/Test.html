@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-QF8CWD3yL+QhcVRAP0DdZehM8EYd3C6QLn1q5aIqebew77CmJNUdIgpDKwbrl0zj" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3"></script>
     <style>
         /* 全局樣式 */
         body {
@@ -23,33 +27,6 @@
             text-shadow: 0px 3px 10px rgba(0, 128, 255, 0.5);
         }
 
-        #track-bar {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        #content-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #lyrics-section {
-            max-height: 150px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            text-align: center;
-            color: #58a6ff;
-        }
-
-        #lyrics-section p.active {
-            font-weight: bold;
-            color: #c9d1d9;
-            text-shadow: 0px 2px 5px rgba(255, 255, 255, 0.6);
-        }
-
         .marquee-item {
             white-space: nowrap;
             display: inline-block;
@@ -61,9 +38,12 @@
         }
 
         .marquee-item-wrapper {
-            width: 100%;            /* 確保容器大小受限制 */
-            overflow: hidden;       /* 隱藏滾出部分 */
-            position: relative;     /* 為內層滾動提供參考 */
+            width: 100%;
+            /* 確保容器大小受限制 */
+            overflow: hidden;
+            /* 隱藏滾出部分 */
+            position: relative;
+            /* 為內層滾動提供參考 */
             display: block;
         }
 
@@ -116,13 +96,23 @@
         }
 
         @keyframes scroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Modal 样式 */
@@ -188,19 +178,38 @@
         .album-details-modal-left {
             flex: 1;
             padding-right: 10px;
-            max-width: 200px; /* Adjust as needed */
+            max-width: 200px;
         }
 
         .album-details-modal-right {
             flex: 2;
-            max-height: 400px; /* Adjust the height as needed */
-            overflow-y: auto;
+            max-height: 400px;
+            overflow: hidden;
         }
-        
+
+        .album-details-modal-right img {
+            max-width: 100%;
+            /* 圖片寬度不超過父容器 */
+            height: auto;
+            /* 保持圖片的寬高比 */
+            max-height: 200px;
+            /* 限制圖片的最大高度 */
+            object-fit: cover;
+            /* 確保圖片適應容器且裁剪不重要部分 */
+            margin-bottom: 10px;
+            /* 添加間距避免圖片過於靠近其他元素 */
+        }
+
         .album-songs-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            max-height: 300px;
+            /* 設置具體高度 */
+            overflow-y: auto;
+            /* 僅對此區域啟用滾動 */
+            padding-right: 10px;
+            /* 滾動條避免貼邊 */
         }
 
         .album-song-item {
@@ -260,6 +269,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Test</h1>
     <div id="albums"></div>
@@ -275,14 +285,20 @@
     <script>
         let audioPlayer;
         let lyricsInterval;
+        let currentPage = 1;
+        const pageSize = 10; // 每頁加載專輯數
 
         // 加載所有專輯
-        async function fetchAlbums() {
+        async function fetchAlbums(page = 1) {
             try {
                 const response = await fetch('http://monstersiren-demo.vercel.app/api/albums');
                 const { data: albums } = await response.json();
                 const albumContainer = document.getElementById('albums');
-                albumContainer.innerHTML = '';
+
+                if (page === 1) {
+                    albumContainer.innerHTML = ''; // 首頁清空列表
+
+                }
                 albums.forEach(album => {
                     const albumDiv = document.createElement('div');
                     albumDiv.classList.add('album');
@@ -295,19 +311,28 @@
                         <button onclick="fetchAlbumDetails('${album.cid}')">查看詳細</button>
                     `;
 
-                     // 检查文本宽度并添加滚动效果
-                     setTimeout(() => {
+                    // 检查文本宽度并添加滚动效果
+                    setTimeout(() => {
                         const marqueeItem = albumDiv.querySelector('.marquee-item');
                         const wrapper = albumDiv.querySelector('.marquee-item-wrapper');
                         if (marqueeItem.scrollWidth > wrapper.offsetWidth) {
                             marqueeItem.classList.add('marquee-scroll');
                         }
                     }, 0);
-                    
+
                     albumContainer.appendChild(albumDiv);
                 });
             } catch (error) {
                 console.error('Error fetching albums:', error);
+            }
+        }
+
+        // 滾動加載
+        function handleScroll() {
+            const albumContainer = document.getElementById('albums');
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                currentPage++;
+                fetchAlbums(currentPage);
             }
         }
 
@@ -316,55 +341,112 @@
             try {
                 const response = await fetch(`http://monstersiren-demo.vercel.app/api/album/${albumId}/detail`);
                 const { data: album } = await response.json();
-                const modalBody = document.getElementById('modal-body');
-                modalBody.innerHTML = `
-                    <div class="album-details-modal-content">
-                        <div class="album-details-modal-left">
-                            <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverUrl)}" alt="${album.name}" onload="this.classList.add('loaded')">
-                            <h2>${album.name}</h2>
-                            <h5>${album.belong}</h5>
-                            <p>${album.intro}</p>
-                            </div>
-                        <div class="album-details-modal-right">
-                            <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(album.coverDeUrl)}" alt="${album.name}" onload="this.classList.add('loaded')">                        
-                            <h3>曲目</h3>
-                            <div class="album-songs-list">
-                                ${album.songs.map(song => `
-                                    <div class="album-song-item">
-                                        <p>${song.name} - ${song.artistes.join(', ')} 
-                                        <button onclick="fetchSong('${song.cid}')">播放歌曲</button></p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                `;
-                showModal();
+
+                renderDetails("album", album);
             } catch (error) {
                 console.error('Error fetching album details:', error);
             }
         }
 
+        async function fetchSongDetails(songId, coverUrl, coverDeUrl) {
+            try {
+                const response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
+                const { data: song } = await response.json();
+
+                // 補全音頻 URL
+                song.audioUrl = song.sourceUrl || "";
+
+                // 使用傳入的專輯封面 URL 資料
+                const albumData = {
+                    coverUrl: coverUrl,
+                    coverDeUrl: coverDeUrl
+                };
+
+                // 將歌曲詳細資料與專輯封面一起渲染
+                renderDetails("song", song, albumData);
+            } catch (error) {
+                console.error('Error fetching song details:', error);
+            }
+        }
+
+        function renderDetails(mode, data, albumData = {}) {
+            const modalBody = document.getElementById('modal-body');
+
+            if (mode === "album") {
+                modalBody.innerHTML = `
+        <div class="album-details-modal-content">
+            <div class="album-details-modal-left">
+                <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(data.coverUrl)}" alt="${data.name}" onload="this.classList.add('loaded')">
+                <h2>${data.name}</h2>
+                <h5>${data.belong}</h5>
+                <p>${data.intro}</p>
+            </div>
+            <div class="album-details-modal-right">
+                <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(data.coverDeUrl)}" alt="${data.name}" onload="this.classList.add('loaded')">                        
+                <h3>曲目</h3>
+                <div class="album-songs-list">
+                    ${data.songs.map(song => `
+                        <div class="album-song-item">
+                            <p>${song.name} - ${song.artistes.join(', ')} 
+                            <button onclick="fetchSongDetails('${song.cid}', '${data.coverUrl}', '${data.coverDeUrl}')">查看歌曲</button></p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+            } else if (mode === "song") {
+                const coverUrl = data.coverUrl || albumData.coverUrl || "";
+                const coverDeUrl = data.coverDeUrl || albumData.coverDeUrl || "";
+                const lyrics = data.lyrics ? data.lyrics.replace(/\n/g, '<br>') : "暫無歌詞";
+
+                modalBody.innerHTML = `
+        <div class="album-details-modal-content">
+            <div class="album-details-modal-left">
+                <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(coverUrl)}" alt="${data.name}" onload="this.classList.add('loaded')">
+                <h2>${data.name}</h2>
+                <div class="player">
+                    <audio controls>
+                        <source src="${data.audioUrl}" type="audio/mpeg">
+                        您的瀏覽器不支持音頻播放。
+                    </audio>
+                </div>
+            </div>
+            <div class="album-details-modal-right">
+                <img loading="lazy" src="http://monstersiren-demo.vercel.app/proxy-image?url=${encodeURIComponent(coverDeUrl)}" alt="${data.name}" onload="this.classList.add('loaded')">
+                <h3>歌詞</h3>
+                <div class="lyrics">
+                    <p>${lyrics}</p>
+                </div>
+            </div>
+        </div>
+    `;
+            }
+
+            showModal();
+        }
+
         // 顯示歌曲信息
         async function fetchSong(songId) {
-        try {
-            const response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
-            const { data: song } = await response.json();
+            try {
+                const response = await fetch(`http://monstersiren-demo.vercel.app/api/song/${songId}`);
+                const { data: song } = await response.json();
 
-            let lyricsContent = '';
-            if (song.lyricUrl) {
-                const lyrics = await fetchLyrics(song.lyricUrl);
-                if (lyrics.length > 0) {
-                    lyricsContent = `
+                let lyricsContent = '';
+                if (song.lyricUrl) {
+                    const lyrics = await fetchLyrics(song.lyricUrl);
+                    if (lyrics.length > 0) {
+                        lyricsContent = `
                         <div id="lyrics">${lyrics.map(line => `<p data-time="${line.time}">${line.text}</p>`).join('')}</div>`;
+                    } else {
+                        lyricsContent = `<p id="no-lyrics">暫無歌詞</p>`;
+                    }
                 } else {
                     lyricsContent = `<p id="no-lyrics">暫無歌詞</p>`;
                 }
-            } else {
-                lyricsContent = `<p id="no-lyrics">暫無歌詞</p>`;
-            }
 
-            const modalBody = document.getElementById('modal-body');
-            modalBody.innerHTML = `
+                const modalBody = document.getElementById('modal-body');
+                modalBody.innerHTML = `
                 <h2>${song.name}</h2>
                 <audio id="audio-player" controls>
                     <source src="${song.sourceUrl}" type="audio/mpeg">
@@ -372,27 +454,27 @@
                 </audio>
                 ${lyricsContent}
             `;
-            
-            audioPlayer = document.getElementById('audio-player');
-            if (song.lyricUrl) {
-                audioPlayer.addEventListener('timeupdate', syncLyrics);
+
+                audioPlayer = document.getElementById('audio-player');
+                if (song.lyricUrl) {
+                    audioPlayer.addEventListener('timeupdate', syncLyrics);
+                }
+            } catch (error) {
+                console.error('Error fetching song details:', error);
             }
-        } catch (error) {
-            console.error('Error fetching song details:', error);
         }
-    }
 
         // 解析歌詞
         async function fetchLyrics(lyricUrl) {
-        try {
-            const response = await fetch(lyricUrl);
-            const lrc = await response.text();
-            return parseLRC(lrc);
-        } catch (error) {
-            console.error('Error fetching lyrics:', error);
-            return []; // 若無法獲取歌詞，返回空數組
+            try {
+                const response = await fetch(lyricUrl);
+                const lrc = await response.text();
+                return parseLRC(lrc);
+            } catch (error) {
+                console.error('Error fetching lyrics:', error);
+                return []; // 若無法獲取歌詞，返回空數組
+            }
         }
-    }
 
         function parseLRC(lrc) {
             const lines = lrc.split('\n');
@@ -425,13 +507,13 @@
                 const containerHeight = lyricsContainer.clientHeight;
                 console.log(containerHeight);
                 const lineTop = activeLine.offsetTop;
-                console.log (lineTop);
+                console.log(lineTop);
                 const lineHeight = activeLine.clientHeight;
 
                 // 計算高亮行要滾動的位置，並避免超出邊界
                 const targetScrollTop = Math.max(
                     0,
-                    lineTop  - containerHeight - lineHeight * 3.5
+                    lineTop - containerHeight - lineHeight * 3.5
                 );
 
                 console.log(targetScrollTop);
@@ -458,6 +540,10 @@
 
         // 初始加載
         fetchAlbums();
+        window.addEventListener('scroll', handleScroll);
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

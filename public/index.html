@@ -1,45 +1,26 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monster Siren Albums</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Music Player</title>
+    <link href="styles.css" rel="stylesheet">
 </head>
+
 <body>
-    <h1>Monster Siren Albums</h1>
-    <div id="albums"></div> <!-- 專輯列表容器 -->
+    <h1>Test</h1>
+    <div id="albums"></div>
 
-    <!-- 全屏覆蓋模式的專輯詳情 -->
-    <div id="albumDetails" class="overlay">
-        <div class="overlay-content">
-            <button id="closeOverlay" class="close-btn">返回</button>
-            <div id="albumContent"></div>
-            <div id="songsList"></div>
+    <!-- Modal 彈窗 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="modal-body"></div>
         </div>
     </div>
 
-    <!-- 音樂播放器 -->
-    <div id="playerContainer" class="player-container">
-        <div class="player-header">
-            <audio id="audioPlayer" controls></audio>
-            <div class="song-info">
-                <span id="songTitle">歌曲名稱</span>
-            </div>
-            <button id="expandButton">⬆️</button>
-        </div>
-        <div id="playerDetails" class="player-details">
-            <div class="info-section">
-                <img id="albumCover" src="" alt="專輯封面" />
-                <h4 id="currentSongTitle"></h4>
-            </div>
-            <div class="lyrics-section">
-                <div id="lyricsContainer"></div>
-                <div class="time-bar" id="timeBar"></div>
-            </div>
-        </div>
-    </div>
-
-    <script src="scripts/main.js"></script>
+    <script src="scripts.js"></script>
 </body>
+
 </html>
