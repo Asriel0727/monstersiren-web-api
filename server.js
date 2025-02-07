@@ -1,19 +1,25 @@
+//Express 初始化建立Express程式
 const express = require('express');
+
+//允許資源共享，使其可從不同網域存取API
 const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
 
+//限制只能載入來自'self'和 https://vercel.live 的資源
 app.use(cors());
 app.use((req, res, next) => {
     res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://vercel.live");
     next();
 });
 
+// 啟動local server
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
 });
-// 获取专辑列表
+
+// 獲取專輯列表
 app.get('/api/albums', async (req, res) => {
   try {
     const response = await axios.get('https://monster-siren.hypergryph.com/api/albums', {
@@ -28,7 +34,7 @@ app.get('/api/albums', async (req, res) => {
   }
 });
 
-// 获取单个专辑详情
+// 獲取單個專輯訊息
 app.get('/api/album/:id/detail', async (req, res) => {
   const albumId = req.params.id;
   try {
@@ -44,7 +50,7 @@ app.get('/api/album/:id/detail', async (req, res) => {
   }
 });
 
-// 获取单个歌曲详情
+// 獲取單個歌曲詳情
 app.get('/api/song/:id', async (req, res) => {
   const songId = req.params.id;
   try {
@@ -60,7 +66,7 @@ app.get('/api/song/:id', async (req, res) => {
   }
 });
 
-// 代理图片请求
+// 代理圖片請求
 app.get('/proxy-image', async (req, res) => {
   const imageUrl = req.query.url;
   try {
@@ -74,7 +80,7 @@ app.get('/proxy-image', async (req, res) => {
   }
 });
 
-// 代理歌词请求
+// 代理歌詞請求
 app.get('/proxy-lyrics', async (req, res) => {
   const lyricsUrl = req.query.url;
   try {
@@ -88,5 +94,5 @@ app.get('/proxy-lyrics', async (req, res) => {
   }
 });
 
-// 导出 Express 应用程序
+// 匯出 Express 應用
 module.exports = app;
