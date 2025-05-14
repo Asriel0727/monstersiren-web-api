@@ -66,6 +66,21 @@ app.get('/api/song/:id', async (req, res) => {
   }
 });
 
+// 獲取歌曲列表
+app.get('/api/songs', async (req, res) => {
+  try {
+    const response = await axios.get('https://monster-siren.hypergryph.com/api/songs', {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching songs:', error);
+    res.status(500).json({ message: 'Error fetching songs' });
+  }
+});
+
 // 代理圖片請求
 app.get('/proxy-image', async (req, res) => {
   const imageUrl = req.query.url;
