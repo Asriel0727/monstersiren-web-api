@@ -109,5 +109,33 @@ app.get('/proxy-lyrics', async (req, res) => {
   }
 });
 
+app.get('/api/song-by-cid/:cid', async (req, res) => {
+  const cid = req.params.cid;
+
+  try {
+    // 先取得所有歌曲列表
+    const allSongsResponse = await axios.get('https://monster-siren.hypergryph.com/api/songs', {
+      headers: { Accept: 'application/json' },
+    });
+
+    // 在所有歌曲中找到對應 cid
+    const targetSong = allSongsResponse.data.data.find(song => song.cid === cid);
+
+    if (!targetSong) {
+      return res.status(404).json({ message: `Song with cid ${cid} not found.` });
+    }
+
+    // 再根據 cid 取得完整歌曲資料
+    const songDetailResponse = await axios.get(`https://monster-siren.hypergryph.com/api/song/${cid}`, {
+      headers: { Accept: 'application/json' },
+    });
+
+    res.json(songDetailResponse.data);
+  } catch (error) {
+    console.error(`Error fetching song for cid ${cid}:`, error.message);
+    res.status(500).json({ message: 'Error fetching song details by cid' });
+  }
+});
+
 // 匯出 Express 應用
 module.exports = app;
